@@ -13,21 +13,23 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-type extractedJob struct {
-	id       string
-	title    string
-	company  string
-	location string
-	metaData string
-	summary  string
+type ExtractedJob struct {
+	Link     string
+	Title    string
+	Company  string
+	Location string
+	MetaData string
+	Summary  string
 }
 
-func Crawl(search string, place string) {
-	baseUrl := fmt.Sprintf("https://%v.indeed.com/jobs?q=%v&limit=50", place, search)
-	viewPage := fmt.Sprintf("https://%s.indeed.com/viewjob?jk=", place)
+var viewPage string
 
-	jobs := []extractedJob{}
-	c := make(chan []extractedJob)
+func Crawl(search string, place string, result chan<- []ExtractedJob) {
+	baseUrl := fmt.Sprintf("https://%v.indeed.com/jobs?q=%v&limit=50", place, search)
+	viewPage = fmt.Sprintf("https://%s.indeed.com/viewjob?jk=", place)
+
+	jobs := []ExtractedJob{}
+	c := make(chan []ExtractedJob)
 	pages := getPages(baseUrl)
 
 	for i := 0; i < pages; i++ {
@@ -48,15 +50,16 @@ func Crawl(search string, place string) {
 	// 	fmt.Println(v.summary)
 	// }
 
-	done := writeJobs(jobs, viewPage)
+	done := writeJobs(jobs)
 	if done {
+		result <- jobs
 		fmt.Println("Done Job")
 	}
 }
-func getJobs(page int, baseUrl string, mainC chan<- []extractedJob) {
+func getJobs(page int, baseUrl string, mainC chan<- []ExtractedJob) {
 
-	jobs := []extractedJob{}
-	c := make(chan extractedJob)
+	jobs := []ExtractedJob{}
+	c := make(chan ExtractedJob)
 	pageUrl := baseUrl + "&start=" + strconv.Itoa(page*50)
 
 	fmt.Println(pageUrl)
@@ -68,7 +71,7 @@ func getJobs(page int, baseUrl string, mainC chan<- []extractedJob) {
 	checkErr(err)
 
 	cards := doc.Find(".cardOutline")
-	cards.Each(func(i int, card *goquery.Selection) {
+	cards.Each(func(_ int, card *goquery.Selection) {
 		go extractJob(card, c)
 	})
 
@@ -80,21 +83,21 @@ func getJobs(page int, baseUrl string, mainC chan<- []extractedJob) {
 	mainC <- jobs
 }
 
-func extractJob(card *goquery.Selection, c chan<- extractedJob) {
+func extractJob(card *goquery.Selection, c chan<- ExtractedJob) {
 	id, _ := card.Find(".resultContent").Find("a").Attr("data-jk")
 	title := card.Find(".jobTitle").Find("a").Text()
 	company := card.Find(".resultContent").Find(".companyName").Text()
 	location := card.Find(".resultContent").Find(".companyLocation").Text()
-	metaData := card.Find(".resultContent").Find(".salaryOnly").Text()
+	metaData := card.Find(".resultContent").Find(".metadataContainer").Text()
 	summary := card.Find(".jobCardShelfContainer").Find(".underShelfFooter").Find(".job-snippet").Text()
 
-	c <- extractedJob{
-		id:       id,
-		title:    title,
-		company:  company,
-		location: location,
-		metaData: metaData,
-		summary:  strings.TrimSpace(summary),
+	c <- ExtractedJob{
+		Link:     viewPage + id,
+		Title:    title,
+		Company:  company,
+		Location: location,
+		MetaData: metaData,
+		Summary:  strings.TrimSpace(summary),
 	}
 }
 
@@ -103,7 +106,7 @@ func getPages(baseUrl string) int {
 	pages := 0
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	defer res.Body.Close()
-	doc.Find(".pagination").Each(func(i int, s *goquery.Selection) {
+	doc.Find(".pagination").Each(func(_ int, s *goquery.Selection) {
 		pages = s.Find("a").Length()
 	})
 	checkErr(err)
@@ -140,7 +143,7 @@ func checkCodeStatus(res *http.Response) {
 	}
 }
 
-func writeJobs(jobs []extractedJob, viewPage string) bool {
+func writeJobs(jobs []ExtractedJob) bool {
 	done := false
 	file, err := os.Create("jobs.csv")
 	checkErr(err)
@@ -153,7 +156,7 @@ func writeJobs(jobs []extractedJob, viewPage string) bool {
 	checkErr(wErr)
 
 	for _, job := range jobs {
-		row := []string{viewPage + job.id, job.title, job.company, job.location, job.metaData, job.summary}
+		row := []string{job.Link, job.Title, job.Company, job.Location, job.MetaData, job.Summary}
 		wErr := w.Write(row)
 		checkErr(wErr)
 		done = true

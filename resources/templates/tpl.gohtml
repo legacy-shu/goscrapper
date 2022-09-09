@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="resources/css/bootstrap.css">
+</head>
+<body>
+<form action="/download" method="POST" accept-charset="UTF-8">
+    <div class="d-grid gap-2">
+        <button class="btn btn-lg btn-primary" type="submit">Download</button>
+    </div>
+</form>
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Link</th>
+            <th scope="col">Title</th>
+            <th scope="col">Company</th>
+            <th scope="col">Location</th>
+            <th scope="col">MetaData</th>
+            <th scope="col">Summary</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        {{ range .Items}}
+            <tr class="table-light">
+                <td><a href="{{ .Link }}">{{ .Link }}</td>
+                <td>{{ .Title }}</td>
+                <td>{{ .Company }}</td>
+                <td>{{ .Location }}</td>
+                <td>{{ .MetaData }}</td>
+                <td>{{ .Summary }}</td>
+            </tr>
+        {{ end}}
+    </tbody>
+
+    
+</table>
+</body>
+</html>
