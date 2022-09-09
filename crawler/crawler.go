@@ -126,11 +126,13 @@ func getHttpRes(url string) *http.Response {
 
 func checkErr(e error) {
 	if e != nil {
+		fmt.Println(e)
 		log.Fatalln(e)
 	}
 }
 func checkCodeStatus(res *http.Response) {
 	if res.StatusCode != 200 {
+		fmt.Println(res.Status)
 		log.Fatalln("Request faild with status code:", res.StatusCode)
 	}
 }
