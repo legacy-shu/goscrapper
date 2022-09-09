@@ -25,6 +25,8 @@ type ExtractedJob struct {
 var viewPage string
 
 func Crawl(search string, place string, result chan<- []ExtractedJob) {
+	fmt.Println("Crawl")
+
 	baseUrl := fmt.Sprintf("https://%v.indeed.com/jobs?q=%v&limit=50", place, search)
 	viewPage = fmt.Sprintf("https://%s.indeed.com/viewjob?jk=", place)
 
@@ -48,6 +50,7 @@ func Crawl(search string, place string, result chan<- []ExtractedJob) {
 	}
 }
 func getJobs(page int, baseUrl string, mainC chan<- []ExtractedJob) {
+	fmt.Println("getjobs")
 
 	jobs := []ExtractedJob{}
 	c := make(chan ExtractedJob)
@@ -75,6 +78,8 @@ func getJobs(page int, baseUrl string, mainC chan<- []ExtractedJob) {
 }
 
 func extractJob(card *goquery.Selection, c chan<- ExtractedJob) {
+	fmt.Println("extractJob")
+
 	id, _ := card.Find(".resultContent").Find("a").Attr("data-jk")
 	title := card.Find(".jobTitle").Find("a").Text()
 	company := card.Find(".resultContent").Find(".companyName").Text()
@@ -93,6 +98,8 @@ func extractJob(card *goquery.Selection, c chan<- ExtractedJob) {
 }
 
 func getPages(baseUrl string) int {
+	fmt.Println("getPages")
+
 	res := getHttpRes(baseUrl)
 	pages := 0
 	doc, err := goquery.NewDocumentFromReader(res.Body)
@@ -106,6 +113,8 @@ func getPages(baseUrl string) int {
 }
 
 func getHttpRes(url string) *http.Response {
+	fmt.Println("getHttpRes")
+
 	req, err := http.NewRequest("GET", url, nil)
 	checkErr(err)
 	req.Header.Set("user-agent", "golang application")
@@ -125,12 +134,16 @@ func getHttpRes(url string) *http.Response {
 }
 
 func checkErr(e error) {
+	fmt.Println("checkErr")
+
 	if e != nil {
 		fmt.Println(e)
 		log.Fatalln(e)
 	}
 }
 func checkCodeStatus(res *http.Response) {
+	fmt.Println("checkCodeStatus")
+
 	if res.StatusCode != 200 {
 		fmt.Println(res.Status)
 		log.Fatalln("Request faild with status code:", res.StatusCode)
@@ -138,6 +151,8 @@ func checkCodeStatus(res *http.Response) {
 }
 
 func writeJobs(jobs []ExtractedJob) bool {
+	fmt.Println("writeJobs")
+
 	done := false
 	file, err := os.Create("jobs.csv")
 	checkErr(err)
