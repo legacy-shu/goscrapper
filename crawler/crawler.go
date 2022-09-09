@@ -113,9 +113,9 @@ func getPages(baseUrl string) int {
 }
 
 func getHttpRes(url string) *http.Response {
-	fmt.Println("getHttpRes")
+	fmt.Println("url:", url)
 
-	req, err := http.NewRequest("POST", url, nil)
+	req, err := http.NewRequest("GET", url, nil)
 	checkErr(err)
 	req.Header.Set("user-agent", "golang application")
 
@@ -124,8 +124,7 @@ func getHttpRes(url string) *http.Response {
 
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{
-			MaxVersion:         tls.VersionTLS12,
-			InsecureSkipVerify: true,
+			MaxVersion: tls.VersionTLS12,
 		},
 	}
 	client := &http.Client{Transport: tr}
