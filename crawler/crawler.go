@@ -41,15 +41,6 @@ func Crawl(search string, place string, result chan<- []ExtractedJob) {
 		jobs = append(jobs, extractedJobs...)
 	}
 
-	// for _, v := range jobs {
-	// 	fmt.Println(v.id)
-	// 	fmt.Println(v.title)
-	// 	fmt.Println(v.company)
-	// 	fmt.Println(v.location)
-	// 	fmt.Println(v.metaData)
-	// 	fmt.Println(v.summary)
-	// }
-
 	done := writeJobs(jobs)
 	if done {
 		result <- jobs
