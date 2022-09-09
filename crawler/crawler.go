@@ -124,7 +124,7 @@ func getHttpRes(url string) *http.Response {
 
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{
-			MaxVersion: tls.VersionTLS12,
+			MaxVersion: tls.VersionTLS11,
 		},
 	}
 	client := &http.Client{Transport: tr}
