@@ -43,7 +43,7 @@ func downloadHnadler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.Handle("/", http.FileServer(http.Dir("public")))
-	http.Handle("/resources/css/", http.StripPrefix("/resources/css/", http.FileServer(http.Dir("./resources/css"))))
+	http.Handle("resources/css/", http.StripPrefix("resources/css/", http.FileServer(http.Dir("resources/css"))))
 	http.HandleFunc("/crawl", crawlHnadler)
 	http.HandleFunc("/download", downloadHnadler)
 
