@@ -44,7 +44,7 @@ func Crawl(search string, place string, result chan<- []ExtractedJob) {
 	done := writeJobs(jobs)
 	if done {
 		result <- jobs
-		fmt.Println("Done Job")
+		fmt.Println("Job Done")
 	}
 }
 func getJobs(page int, baseUrl string, mainC chan<- []ExtractedJob) {
