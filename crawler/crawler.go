@@ -1,6 +1,7 @@
 package crawler
 
 import (
+	//"crypto/tls"
 	"crypto/tls"
 	"encoding/csv"
 	"fmt"
@@ -120,12 +121,27 @@ func getHttpRes(url string) *http.Response {
 	req.Header.Add("accept", `text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9`)
 	req.Header.Add("user-agent", `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36`)
 
-	tr := &http.Transport{
-        TLSClientConfig: &tls.Config{
-            MaxVersion: tls.VersionTLS12,
-        },
-    }
-    client := &http.Client{Transport: tr}
+	// tr := &http.Transport{
+	// 	// TLSClientConfig: &tls.Config{
+	// 	// 	MaxVersion: tls.VersionTLS12,
+	// 	// },
+	// }
+	// client := &http.Client{Transport: tr}
+
+	defaultTransport := http.DefaultTransport.(*http.Transport)
+
+	// Create new Transport that ignores self-signed SSL
+	customTransport := &http.Transport{
+		Proxy:                 defaultTransport.Proxy,
+		DialContext:           defaultTransport.DialContext,
+		MaxIdleConns:          defaultTransport.MaxIdleConns,
+		IdleConnTimeout:       defaultTransport.IdleConnTimeout,
+		ExpectContinueTimeout: defaultTransport.ExpectContinueTimeout,
+		TLSHandshakeTimeout:   defaultTransport.TLSHandshakeTimeout,
+		TLSClientConfig:       &tls.Config{MaxVersion: tls.VersionTLS12, InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: customTransport}
+
 	res, err := client.Do(req)
 	checkErr(err)
 	checkCodeStatus(res)
