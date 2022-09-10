@@ -117,15 +117,15 @@ func getHttpRes(url string) *http.Response {
 
 	req, err := http.NewRequest("GET", url, nil)
 	checkErr(err)
-	req.Header.Add("Accept", `text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8`)
-	req.Header.Add("User-Agent", `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11`)
+	req.Header.Add("accept", `text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9`)
+	req.Header.Add("user-agent", `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36`)
 
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{
-			MaxVersion: tls.VersionTLS13,
-		},
-	}
-	client := &http.Client{Transport: tr}
+        TLSClientConfig: &tls.Config{
+            MaxVersion: tls.VersionTLS12,
+        },
+    }
+    client := &http.Client{Transport: tr}
 	res, err := client.Do(req)
 	checkErr(err)
 	checkCodeStatus(res)
